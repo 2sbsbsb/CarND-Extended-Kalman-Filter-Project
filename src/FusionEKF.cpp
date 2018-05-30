@@ -46,20 +46,19 @@ FusionEKF::FusionEKF() {
           1, 1, 0, 0,
           1, 1, 1, 1;
 
-    //the initial transition matrix F_
+  // The initial transition matrix F_
   ekf_.F_ = MatrixXd(4, 4);
   ekf_.F_ << 1, 0, 1, 0,
              0, 1, 0, 1,
              0, 0, 1, 0,
              0, 0, 0, 1;
     
-  //state covariance matrix P
+  // State covariance matrix P
   ekf_.P_ = MatrixXd(4, 4);
   ekf_.P_ << 1, 0, 0, 0,
-               0, 1, 0, 0,
-               0, 0, 1000, 0,
-               0, 0, 0, 1000;
-
+             0, 1, 0, 0,
+             0, 0, 1000, 0,
+             0, 0, 0, 1000;
 
 }
 
@@ -90,9 +89,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
-      double rho = measurement_pack.raw_measurements_[0]; // range
-      double phi = measurement_pack.raw_measurements_[1]; // bearing
-      double rho_dot = measurement_pack.raw_measurements_[2]; // velocity
+      double rho = measurement_pack.raw_measurements_[0]; // range: radial distance from origin
+      double phi = measurement_pack.raw_measurements_[1]; // bearing: angle between rho and x axis
+      double rho_dot = measurement_pack.raw_measurements_[2]; // velocity: change of rho
       
        // polar to cartesian convertion
       double x = rho * cos(phi);
@@ -111,10 +110,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       double vy = rho_dot * sin(phi);
       
       ekf_.x_ << x, y, vx , vy;
-      
-      //save the first correct timestamp as well
-      previous_timestamp_ = measurement_pack.timestamp_;
-      
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -123,10 +118,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
        //set the state with the initial location and zero velocity
       ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
       
-      //save the first correct timestamp as well
-      previous_timestamp_ = measurement_pack.timestamp_;
     }
-
+    //save the first correct timestamp as well
+      previous_timestamp_ = measurement_pack.timestamp_;
+      
     // done initializing, no need to predict or update
     is_initialized_ = true;
     return;
